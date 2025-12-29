@@ -15,7 +15,9 @@ struct Weight {
         float angularPosition;
         float angularVelocity;
         float mass;
-        Weight(float angularPosition);
+        float length;
+
+        Weight(float angularPosition, float length);
         Coordinate position();
         float energy();
         void update(int durationMillis);

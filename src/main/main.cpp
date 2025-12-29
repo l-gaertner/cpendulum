@@ -3,6 +3,32 @@
 #include <thread>
 #include <chrono>
 
+void draw_line(int x1, int y1, int x2, int y2) {
+    int dx = abs(x2 - x1);
+    int dy = -abs(y2 - y1);
+    int sx = x1 < x2 ? 1 : -1;
+    int sy = y1 < y2 ? 1 : -1;
+    int err = dx + dy;
+
+    while (1) {
+        // Use mvaddch to plot the character
+        // Note: ncurses uses (y, x) order
+        mvaddch(y1, x1, '.'); 
+
+        if (x1 == x2 && y1 == y2) break;
+        
+        int e2 = 2 * err;
+        if (e2 >= dy) {
+            err += dy;
+            x1 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+}
+
 void draw(Pendulum pendulum) {
     // 1. Initialize the screen
     initscr();            
@@ -28,7 +54,6 @@ void draw(Pendulum pendulum) {
         // 2. Draw the character
         // move(y, x) then addch(char)
         // Note: ncurses uses (y, x) order, not (x, y)
-        mvaddch(pivot_y, pivot_x, '#');
 
         for (int a = pivot_y+1; a < LINES - 1; a ++)
             mvaddch(a, pivot_x, '|');
@@ -36,10 +61,20 @@ void draw(Pendulum pendulum) {
         for (int a = 0; a < COLS; a ++)
             mvaddch(LINES-2, a, '-');
 
-        auto weight = pendulum.getWeight1();
-        int weight_y = (weight.y / max_height) * LINES;
-        int weight_x = (weight.x / max_width_from_center) * COLS * 0.6 / 2 + COLS / 2;
-        mvaddch(weight_y, weight_x, 'O');
+        auto weight1 = pendulum.getWeight1();
+        int weight_1_y = (weight1.y / max_height) * LINES;
+        int weight_1_x = (weight1.x / max_width_from_center) * COLS * 0.6 / 2 + COLS / 2;
+
+        auto weight2 = pendulum.getWeight2();
+        int weight_2_y = (weight2.y / max_height) * LINES;
+        int weight_2_x = (weight2.x / max_width_from_center) * COLS * 0.6 / 2 + COLS / 2;
+
+        draw_line(weight_1_x, weight_1_y, weight_2_x, weight_2_y);
+        draw_line(weight_1_x, weight_1_y, pivot_x, pivot_y);
+
+        mvaddch(pivot_y, pivot_x, '#');
+        mvaddch(weight_1_y, weight_1_x, 'O');
+        mvaddch(weight_2_y, weight_2_x, 'O');
 
         // Print a message elsewhere
         mvprintw(LINES - 1, 0, "Press any key to exit ...");
@@ -64,7 +99,7 @@ void draw(Pendulum pendulum) {
 
 int main() {
     Pendulum pendulum;
-    pendulum.init(0.0, 0.0);
+    pendulum.init(120.0, 145.0);
 
     draw(pendulum);
 
