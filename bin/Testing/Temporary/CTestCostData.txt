@@ -1,0 +1,12 @@
+PendulumTest.InitialState 20 0.000369279
+PendulumTest.ManualInitialState 1 0
+PendulumTest.InitStateRightRight 5 0.00128664
+PendulumTest.InitStateUpUp 4 0.00144686
+PendulumTest.InitStateDownDown 2 0.00261444
+InitialStatePendulumTest.InitialState 24 0.000350267
+InitialStatePendulumTest.InitStateRightRight 5 0.00125322
+InitialStatePendulumTest.InitStateUpUp 21 0.000249482
+InitialStatePendulumTest.InitStateDownDown 21 0.000226423
+SimulationPendulumTest.InitialState 6 0.000782618
+SimulationPendulumTest.StateAfterOneIteration 5 0.000903017
+---

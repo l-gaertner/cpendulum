@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmain_lib.a CMakeFiles/main_lib.dir/main/Pendulum.cpp.o CMakeFiles/main_lib.dir/main/Weight.cpp.o
+/usr/bin/ranlib libmain_lib.a
