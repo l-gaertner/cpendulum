@@ -5,21 +5,20 @@
 
 struct Coordinate {
     public:
-        float x,y;
+        double x,y;
         Coordinate add(Coordinate val);
 
 };
 
 struct Weight {
     public:
-        float angularPosition;
-        float angularVelocity;
-        float mass;
-        float length;
+        double angularPosition;
+        double angularVelocity;
+        double mass;
+        double length;
 
-        Weight(float angularPosition, float length);
+        Weight(double angularPosition, double length);
         Coordinate position();
-        float energy();
         void update(int durationMillis);
 };
 
