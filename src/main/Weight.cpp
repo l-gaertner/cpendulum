@@ -25,5 +25,13 @@ Weight::Weight(double angle, double l) {
     length = l;
 }
 
-void Weight::update(int durationMillis) {
+Weight::Weight(double angle, double velocity, double m, double l) {
+    angularPosition = angle;
+    angularVelocity = velocity;
+    mass = m;
+    length = l;
+}
+
+Weight Weight::of(double angularPosition, double angularVelocity) {
+    return Weight(angularPosition, angularVelocity, mass, length);
 }

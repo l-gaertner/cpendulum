@@ -114,7 +114,11 @@ void draw(Pendulum pendulum) {
         // 4. Wait for user input so the program doesn't close instantly
         if (getch() != ERR) run = false;
 
-        pendulum.calculateAndApplyForcesEulerCromer(1);
+        if (true) {
+            pendulum.calculateAndApplyForcesEulerCromer(1);
+        } else {
+            pendulum.calculateAndApplyForcesRungeKutta(1);
+        }
         auto loop_duration = std::chrono::milliseconds(1);
         std::this_thread::sleep_for(loop_duration);
 

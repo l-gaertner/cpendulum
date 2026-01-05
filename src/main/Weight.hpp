@@ -11,6 +11,9 @@ struct Coordinate {
 };
 
 struct Weight {
+    private:
+        Weight(double angularPosition, double angularVelocity, double mass, double length);
+
     public:
         double angularPosition;
         double angularVelocity;
@@ -19,7 +22,7 @@ struct Weight {
 
         Weight(double angularPosition, double length);
         Coordinate position();
-        void update(int durationMillis);
+        Weight of(double angularPosition, double angularVelocity);
 };
 
 #endif

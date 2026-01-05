@@ -97,17 +97,55 @@ void Pendulum::calculateAndApplyForcesEulerCromer(unsigned int durationMillis) {
 void Pendulum::calculateAndApplyForcesRungeKutta(unsigned int durationMillis) {
     auto h = ((double) durationMillis / 1000.0);
 
-    auto acceleration_w1 = weight_1_acceleration(weight1, weight2);
-    auto angularVelocity_w1 = weight1.angularVelocity + acceleration_w1 * h;
-    auto angularPosition_w1 = weight1.angularPosition + angularVelocity_w1 * h;
+    // k1
+    auto k1_w1_a = weight_1_acceleration(weight1, weight2);
+    auto k1_w1_v = weight1.angularVelocity + k1_w1_a * h;
+    auto k1_w1_theta = weight1.angularPosition + k1_w1_v * h;
+    Weight k1_w1 = weight1.of(k1_w1_theta, k1_w1_v);
 
-    auto acceleration_w2 = weight_2_acceleration(weight1, weight2);
-    auto angularVelocity_w2 = weight2.angularVelocity + acceleration_w2 * h;
-    auto angularPosition_w2 = weight2.angularPosition + angularVelocity_w2 * h;
+    auto k1_w2_a = weight_2_acceleration(weight1, weight2);
+    auto k1_w2_v = weight2.angularVelocity + k1_w2_a * h;
+    auto k1_w2_theta = weight2.angularPosition + k1_w2_v * h;
+    Weight k1_w2 = weight2.of(k1_w2_theta, k1_w2_v);
 
-    weight1.angularVelocity = angularVelocity_w1;
-    weight1.angularPosition = angularPosition_w1;
+    //k2
+    auto k2_w1_a = weight_1_acceleration(k1_w1, k1_w2);
+    auto k2_w1_v = weight1.angularVelocity + k2_w1_a * h/2;
+    auto k2_w1_theta = weight1.angularPosition + k2_w1_v * h/2;
+    Weight k2_w1 = weight1.of(k2_w1_theta, k2_w1_v);
 
-    weight2.angularVelocity = angularVelocity_w2;
-    weight2.angularPosition = angularPosition_w2;
+    auto k2_w2_a = weight_2_acceleration(k1_w1, k1_w2);
+    auto k2_w2_v = weight2.angularVelocity + k2_w2_a * h/2;
+    auto k2_w2_theta = weight2.angularPosition + k2_w2_v * h/2;
+    Weight k2_w2 = weight2.of(k2_w2_theta, k2_w2_v);
+
+    //k3
+    auto k3_w1_a = weight_1_acceleration(k2_w1, k2_w2);
+    auto k3_w1_v = weight1.angularVelocity + k3_w1_a * h/2;
+    auto k3_w1_theta = weight1.angularPosition + k3_w1_v * h/2;
+    Weight k3_w1 = weight1.of(k3_w1_theta, k3_w1_v);
+
+    auto k3_w2_a = weight_2_acceleration(k2_w1, k2_w2);
+    auto k3_w2_v = weight2.angularVelocity + k3_w2_a * h/2;
+    auto k3_w2_theta = weight2.angularPosition + k3_w2_v * h/2;
+    Weight k3_w2 = weight2.of(k3_w2_theta, k3_w2_v);
+
+    //k4
+    auto k4_w1_a = weight_1_acceleration(k3_w1, k3_w2);
+    auto k4_w1_v = weight1.angularVelocity + k4_w1_a * h;
+    auto k4_w1_theta = weight1.angularPosition + k4_w1_v * h;
+    Weight k4_w1 = weight1.of(k4_w1_theta, k4_w1_v);
+
+    auto k4_w2_a = weight_2_acceleration(k3_w1, k3_w2);
+    auto k4_w2_v = weight2.angularVelocity + k4_w2_a * h;
+    auto k4_w2_theta = weight2.angularPosition + k4_w2_v * h;
+    Weight k4_w2 = weight2.of(k4_w2_theta, k4_w2_v);
+
+    //y_{n+1}
+
+    weight1.angularVelocity = weight1.angularVelocity + 1.0/6.0 * h * (k1_w1_a + 2 * k2_w1_a + 2 * k3_w1_a + k4_w1_a);
+    weight1.angularPosition = weight1.angularPosition + 1.0/6.0 * h * (k1_w1_v + 2 * k2_w1_v + 2 * k3_w1_v + k4_w1_v);
+
+    weight2.angularVelocity = weight2.angularVelocity + 1.0/6.0 * h * (k1_w2_a + 2 * k2_w2_a + 2 * k3_w2_a + k4_w2_a);
+    weight2.angularPosition = weight2.angularPosition + 1.0/6.0 * h * (k1_w2_v + 2 * k2_w2_v + 2 * k3_w2_v + k4_w2_v);
 }
