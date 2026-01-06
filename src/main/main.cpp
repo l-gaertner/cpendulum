@@ -38,7 +38,7 @@ void draw_frame() {
     mvprintw(LINES - 1, 0, "Press any key to exit ...");
 }
 
-void draw_pendulum(Pendulum pendulum) {
+void draw_pendulum(Pendulum pendulum, int horizontal_off_center) {
     auto pivot = pendulum.getPivot();
 
     auto max_height = pivot.y * 2;
@@ -47,18 +47,18 @@ void draw_pendulum(Pendulum pendulum) {
     const auto base_line = LINES - 2;
 
     int pivot_y = base_line - (pivot.y / max_height) * LINES;
-    int pivot_x = (pivot.x / max_width_from_center) * COLS / 2 + COLS / 2;
+    int pivot_x = (pivot.x / max_width_from_center) * COLS / 2 + COLS / 2 + horizontal_off_center;
 
-    for (int a = pivot_y+1; a < LINES - 1; a ++)
+    for (int a = pivot_y+1; a < LINES - 2; a ++)
         mvaddch(a, pivot_x, '|');
 
     auto weight1 = pendulum.getWeight1();
     int weight_1_y = base_line - (weight1.y / max_height) * LINES;
-    int weight_1_x = (weight1.x / max_width_from_center) * COLS * 0.6 / 2 + COLS / 2;
+    int weight_1_x = (weight1.x / max_width_from_center) * COLS * 0.6 / 2 + COLS / 2 + horizontal_off_center;
 
     auto weight2 = pendulum.getWeight2();
     int weight_2_y = base_line - (weight2.y / max_height) * LINES;
-    int weight_2_x = (weight2.x / max_width_from_center) * COLS * 0.6 / 2 + COLS / 2;
+    int weight_2_x = (weight2.x / max_width_from_center) * COLS * 0.6 / 2 + COLS / 2 + horizontal_off_center;
 
     draw_line(weight_1_x, weight_1_y, weight_2_x, weight_2_y);
     draw_line(weight_1_x, weight_1_y, pivot_x, pivot_y);
@@ -82,7 +82,7 @@ void print_energy(Pendulum pendulum) {
 
 }
 
-void draw(Pendulum pendulum) {
+void draw(Pendulum pendulum_1, Pendulum pendulum_2) {
     // 1. Initialize the screen
     initscr();            
     raw();                // Disable line buffering (get input immediately)
@@ -103,8 +103,9 @@ void draw(Pendulum pendulum) {
         if (a % 30 == 0) {
             clear();
             draw_frame();
-            draw_pendulum(pendulum);
-            print_energy(pendulum);
+            draw_pendulum(pendulum_1, 30);
+            draw_pendulum(pendulum_2, -30);
+            print_energy(pendulum_1);
 
 
             // 3. Refresh the screen to show the changes
@@ -114,10 +115,12 @@ void draw(Pendulum pendulum) {
         // 4. Wait for user input so the program doesn't close instantly
         if (getch() != ERR) run = false;
 
-        if (true) {
-            pendulum.calculateAndApplyForcesEulerCromer(1);
+        if (false) {
+            pendulum_1.calculateAndApplyForcesEulerCromer(1);
+            pendulum_2.calculateAndApplyForcesEulerCromer(1);
         } else {
-            pendulum.calculateAndApplyForcesRungeKutta(1);
+            pendulum_1.calculateAndApplyForcesRungeKutta(1);
+            pendulum_2.calculateAndApplyForcesRungeKutta(1);
         }
         auto loop_duration = std::chrono::milliseconds(1);
         std::this_thread::sleep_for(loop_duration);
@@ -129,11 +132,15 @@ void draw(Pendulum pendulum) {
 }
 
 int main() {
-    Pendulum pendulum;
-    pendulum.init(120.0, 145.0);
+    Pendulum pendulum_1;
+    pendulum_1.init(120.0, 145.0);
     // pendulum.init(180.0, 180.0);
 
-    draw(pendulum);
+    Pendulum pendulum_2;
+    pendulum_2.init(120.0, 146.0);
+    // pendulum.init(180.0, 180.0);
+
+    draw(pendulum_1, pendulum_2);
 
     return 0;
 }

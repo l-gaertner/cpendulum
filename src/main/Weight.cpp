@@ -6,11 +6,11 @@ Coordinate Coordinate::add(Coordinate val) {
     return Coordinate{x + val.x, y + val.y};
 }
 
-float sin_90_deg(double angle) {
+double sin_90_deg(double angle) {
     return sin(angle - M_PI/2);
 }
 
-float cos_90_deg(double angle) {
+double cos_90_deg(double angle) {
     return cos(angle - M_PI/2);
 }
 

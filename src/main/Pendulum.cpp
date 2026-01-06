@@ -55,8 +55,9 @@ double weight_1_acceleration(Weight weight1, Weight weight2) {
 
     double acc_1_t1 = -1 * g * (2 * weight1.mass + weight2.mass) * sin(weight1.angularPosition);
     double acc_1_t2 = -1 * weight2.mass * g * sin(weight1.angularPosition - 2 * weight2.angularPosition);
-    double acc_1_t3 = -2 * sin(delta_angle) * weight2.mass * (weight2.angularVelocity * weight2.angularVelocity * weight2.length + weight1.angularVelocity * weight1.angularVelocity * weight1.length * cos(delta_angle));
-    double acc_1_t4 = weight1.length * (2 * weight1.mass + weight2.mass - weight2.mass * cos(2 * weight1.angularPosition - 2 * weight2.angularPosition));
+    double acc_1_t3_2 = weight2.angularVelocity * weight2.angularVelocity * weight2.length + weight1.angularVelocity * weight1.angularVelocity * weight1.length * cos(delta_angle);
+    double acc_1_t3 = -2 * sin(delta_angle) * weight2.mass * (acc_1_t3_2);
+    double acc_1_t4 = weight1.length * (2 * weight1.mass + weight2.mass - weight2.mass * cos(2 * delta_angle));
 
     return (acc_1_t1 + acc_1_t2 + acc_1_t3) / acc_1_t4;
 
@@ -69,23 +70,23 @@ double weight_2_acceleration(Weight weight1, Weight weight2) {
     double acc_2_t1 = weight1.angularVelocity * weight1.angularVelocity * weight1.length * (weight1.mass  + weight2.mass);
     double acc_2_t2 = g * (weight1.mass + weight2.mass) * cos(weight1.angularPosition);
     double acc_2_t3 = weight2.angularVelocity * weight2.angularVelocity * weight2.length * weight2.mass * cos(delta_angle);
-    double acc_2_t4 = 2 * weight1.mass + weight2.mass - weight2.mass * cos(2 * weight1.angularPosition - 2 * weight2.angularPosition);
+    double acc_2_t4 = weight2.length * (2 * weight1.mass + weight2.mass - weight2.mass * cos(2 * delta_angle));
 
-    return (2 * sin(delta_angle) * (acc_2_t1 + acc_2_t2 + acc_2_t3))/(weight2.length * acc_2_t4);
+    return (2 * sin(delta_angle) * (acc_2_t1 + acc_2_t2 + acc_2_t3))/ acc_2_t4;
 
 }
 
 
 void Pendulum::calculateAndApplyForcesEulerCromer(unsigned int durationMillis) {
-    auto h = ((double) durationMillis / 1000.0);
+    double h = ((double) durationMillis / 1000.0);
 
-    auto acceleration_w1 = weight_1_acceleration(weight1, weight2);
-    auto angularVelocity_w1 = weight1.angularVelocity + acceleration_w1 * h;
-    auto angularPosition_w1 = weight1.angularPosition + angularVelocity_w1 * h;
+    double acceleration_w1 = weight_1_acceleration(weight1, weight2);
+    double angularVelocity_w1 = weight1.angularVelocity + acceleration_w1 * h;
+    double angularPosition_w1 = weight1.angularPosition + angularVelocity_w1 * h;
 
-    auto acceleration_w2 = weight_2_acceleration(weight1, weight2);
-    auto angularVelocity_w2 = weight2.angularVelocity + acceleration_w2 * h;
-    auto angularPosition_w2 = weight2.angularPosition + angularVelocity_w2 * h;
+    double acceleration_w2 = weight_2_acceleration(weight1, weight2);
+    double angularVelocity_w2 = weight2.angularVelocity + acceleration_w2 * h;
+    double angularPosition_w2 = weight2.angularPosition + angularVelocity_w2 * h;
 
     weight1.angularVelocity = angularVelocity_w1;
     weight1.angularPosition = angularPosition_w1;
@@ -95,47 +96,46 @@ void Pendulum::calculateAndApplyForcesEulerCromer(unsigned int durationMillis) {
 }
 
 void Pendulum::calculateAndApplyForcesRungeKutta(unsigned int durationMillis) {
-    auto h = ((double) durationMillis / 1000.0);
+    double h = ((double) durationMillis / 1000.0);
 
-    // k = position slope, l = velocity slope
+    // k = velocity slope, l = position slope
     // k1
-    auto k1_w1 = h * weight_1_acceleration(weight1, weight2);
-    auto l1_w1 = h * weight1.angularVelocity;
-    Weight t1_w1 = weight1.of(weight1.angularPosition + 0.5 * k1_w1, weight1.angularVelocity + 0.5 * l1_w1);
-
-    auto k1_w2 = h * weight_2_acceleration(weight1, weight2);
-    auto l1_w2 = h * weight2.angularVelocity;
-    Weight t1_w2 = weight2.of(weight2.angularPosition + 0.5 * k1_w2, weight2.angularVelocity + 0.5 * l1_w2);
+    double k1_w1 = h * weight_1_acceleration(weight1, weight2);
+    double l1_w1 = h * weight1.angularVelocity;
+    double k1_w2 = h * weight_2_acceleration(weight1, weight2);
+    double l1_w2 = h * weight2.angularVelocity;
 
     //k2
-    auto k2_w1 = h * weight_1_acceleration(t1_w1, t1_w2);
-    auto l2_w1 = h * (weight1.angularVelocity + l1_w1 * 0.5);
-    Weight t2_w1 = weight1.of(weight1.angularPosition + 0.5 * k2_w1, weight1.angularVelocity + 0.5 * l2_w1);
+    Weight weight1_t1 = weight1.of(weight1.angularPosition + 0.5 * l1_w1, weight1.angularVelocity + 0.5 * k1_w1);
+    Weight weight2_t1 = weight2.of(weight2.angularPosition + 0.5 * l1_w2, weight2.angularVelocity + 0.5 * k1_w2);
 
-    auto k2_w2 = h * weight_2_acceleration(t1_w1, t1_w2);
-    auto l2_w2 = h * (weight2.angularVelocity + l1_w2 * 0.5);
-    Weight t2_w2 = weight2.of(weight2.angularPosition + 0.5 * k2_w2, weight2.angularVelocity + 0.5 * l2_w2);
+    double k2_w1 = h * weight_1_acceleration(weight1_t1, weight2_t1);
+    double l2_w1 = h * (weight1_t1.angularVelocity);
+    double k2_w2 = h * weight_2_acceleration(weight1_t1, weight2_t1);
+    double l2_w2 = h * (weight2_t1.angularVelocity);
 
     //k3
-    auto k3_w1 = h * weight_1_acceleration(t2_w1, t2_w2);
-    auto l3_w1 = h * (weight1.angularVelocity + l2_w1 * 0.5);
-    Weight t3_w1 = weight1.of(weight1.angularPosition + k3_w1, weight1.angularVelocity + l3_w1);
+    Weight weight1_t2 = weight1.of(weight1.angularPosition + 0.5 * l2_w1, weight1.angularVelocity + 0.5 * k2_w1);
+    Weight weight2_t2 = weight2.of(weight2.angularPosition + 0.5 * l2_w2, weight2.angularVelocity + 0.5 * k2_w2);
 
-    auto k3_w2 = h * weight_2_acceleration(t2_w1, t2_w2);
-    auto l3_w2 = h * (weight2.angularVelocity + l2_w2 * 0.5);
-    Weight t3_w2 = weight2.of(weight2.angularPosition + k3_w2, weight2.angularVelocity + l3_w2);
+    double k3_w1 = h * weight_1_acceleration(weight1_t2, weight2_t2);
+    double l3_w1 = h * (weight1_t2.angularVelocity);
+    double k3_w2 = h * weight_2_acceleration(weight1_t2, weight2_t2);
+    double l3_w2 = h * (weight2_t2.angularVelocity);
 
     //k4
-    auto k4_w1 = h * weight_1_acceleration(t3_w1, t3_w2);
-    auto l4_w1 = h * (weight1.angularVelocity + l3_w1);
+    Weight weight1_t3 = weight1.of(weight1.angularPosition + l3_w1, weight1.angularVelocity + k3_w1);
+    Weight weight2_t3 = weight2.of(weight2.angularPosition + l3_w2, weight2.angularVelocity + k3_w2);
 
-    auto k4_w2 = h * weight_2_acceleration(t3_w1, t3_w2);
-    auto l4_w2 = h * (weight2.angularVelocity + l3_w2);
+    double k4_w1 = h * weight_1_acceleration(weight1_t3, weight2_t3);
+    double l4_w1 = h * (weight1_t3.angularVelocity);
+    double k4_w2 = h * weight_2_acceleration(weight1_t3, weight2_t3);
+    double l4_w2 = h * (weight2_t3.angularVelocity);
 
     //y_{n+1}
-    weight1.angularPosition = weight1.angularPosition + 1.0/6.0 * h * (k1_w1 + 2 * k2_w1 + 2 * k3_w1 + k4_w1);
-    weight1.angularVelocity = weight1.angularVelocity + 1.0/6.0 * h * (l1_w1 + 2 * l2_w1 + 2 * l3_w1 + l4_w1);
+    weight1.angularVelocity = weight1.angularVelocity + 1.0/6.0 * (k1_w1 + 2 * k2_w1 + 2 * k3_w1 + k4_w1);
+    weight1.angularPosition = weight1.angularPosition + 1.0/6.0 * (l1_w1 + 2 * l2_w1 + 2 * l3_w1 + l4_w1);
 
-    weight2.angularPosition = weight2.angularPosition + 1.0/6.0 * h * (k1_w2 + 2 * k2_w2 + 2 * k3_w2 + k4_w2);
-    weight2.angularVelocity = weight2.angularVelocity + 1.0/6.0 * h * (l1_w2 + 2 * l2_w2 + 2 * l3_w2 + l4_w2);
+    weight2.angularVelocity = weight2.angularVelocity + 1.0/6.0 * (k1_w2 + 2 * k2_w2 + 2 * k3_w2 + k4_w2);
+    weight2.angularPosition = weight2.angularPosition + 1.0/6.0 * (l1_w2 + 2 * l2_w2 + 2 * l3_w2 + l4_w2);
 }
