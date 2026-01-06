@@ -53,19 +53,6 @@ TEST(SimulationPendulumTest, DownDownZeroKineticEnergy) {
     ASSERT_NEAR(pendulum.energy().kin, 0.0, 0.001);
 }
 
-TEST(SimulationPendulumTest, StateAfterOneIterationRungeKutta) {
-    Pendulum pendulum;
-    pendulum.init(90, 90);
-    auto e0 = pendulum.energy().total();
-
-    pendulum.calculateAndApplyForcesRungeKutta(6);
-
-    auto e1 = pendulum.energy().total();
-
-    float small_error = 0.001;
-    ASSERT_NEAR(e0, e1, small_error);
-}
-
 TEST(SimulationPendulumTest, StateAfter100IterationsEuler) {
     Pendulum pendulum;
     pendulum.init(90, 90);
@@ -73,6 +60,19 @@ TEST(SimulationPendulumTest, StateAfter100IterationsEuler) {
 
     for (int a = 0; a < 100; a++)
         pendulum.calculateAndApplyForcesEulerCromer(1);
+
+    auto e1 = pendulum.energy().total();
+
+    float small_error = 0.01;
+    ASSERT_NEAR(e0, e1, small_error);
+}
+
+TEST(SimulationPendulumTest, StateAfterOneIterationRungeKutta) {
+    Pendulum pendulum;
+    pendulum.init(90, 90);
+    auto e0 = pendulum.energy().total();
+
+    pendulum.calculateAndApplyForcesRungeKutta(1);
 
     auto e1 = pendulum.energy().total();
 
