@@ -70,9 +70,9 @@ void draw_pendulum(Pendulum pendulum, int horizontal_off_center) {
 
 void print_energy(Pendulum pendulum) {
 
-    std::string l1 = std::format("Pendulum total energy: {}", pendulum.energy().total()).c_str();
-    std::string l2 = std::format("E kinetic: {}", pendulum.energy().kin).c_str();
-    std::string l3 = std::format("E potential: {}", pendulum.energy().pot).c_str();
+    std::string l1 = std::format("Pendulum total energy: {}", std::round(pendulum.energy().total() * 100.0) / 100.0).c_str();
+    std::string l2 = std::format("E kinetic: {}", std::round(pendulum.energy().kin * 100.0) / 100.0).c_str();
+    std::string l3 = std::format("E potential: {}", std::round(pendulum.energy().pot * 100.0) / 100.0).c_str();
 
     int pos_x = COLS - 30;
 
